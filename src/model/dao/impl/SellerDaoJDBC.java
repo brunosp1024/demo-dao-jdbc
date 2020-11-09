@@ -13,7 +13,7 @@ import model.entities.Department;
 import model.entities.Seller;
 
 public class SellerDaoJDBC implements SellerDao {
-	
+
 	private Connection conn;
 
 	public SellerDaoJDBC(Connection conn) {
@@ -23,19 +23,19 @@ public class SellerDaoJDBC implements SellerDao {
 	@Override
 	public void insert(Seller obj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void update(Seller obj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteById(Integer id) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -45,42 +45,52 @@ public class SellerDaoJDBC implements SellerDao {
 		ResultSet rs = null;
 		try {
 			ps = conn.prepareStatement(
-					"SELECT seller.*,department.Name as DepName "
+					"SELECT seller.*,department.Name as DepName " 
 					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id "
-					+ "WHERE seller.Id = ?" 
-					);
+					+ "ON seller.DepartmentId = department.Id " 
+					+ "WHERE seller.Id = ?"
+			);
 			ps.setInt(1, id);
 			rs = ps.executeQuery();
-			if(rs.next()) { //Verifica se houve algum resultado e retorna verdadeiro se sim.
-				Department dep = new Department();
-				dep.setId(rs.getInt("DepartmentId"));
-				dep.setName(rs.getString("DepName"));
-				Seller sel = new Seller();
-				sel.setId(rs.getInt("Id"));
-				sel.setName(rs.getString("Name"));
-				sel.setEmail(rs.getString("Email"));
-				sel.setBirthDate(rs.getDate("BirthDate"));
-				sel.setBaseSalary(rs.getDouble("BaseSalary"));
-				sel.setDepartment(dep);
+			if (rs.next()) { // Verifica se há algum resultado e retorna verdadeiro caso seja sim.
+				Department dep = intantiateDepartment(rs);
+				Seller sel = instantiateSeller(rs, dep);
 				return sel;
 			}
-		
-		return null;
-			
-		}catch(SQLException e) {
+
+			return null;
+
+		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-		}finally {
+		} finally {
 			DB.closeResultSet(rs);
 			DB.closeStatement(ps);
 		}
-		
+
 	}
 
 	@Override
 	public List<Seller> findAll() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private Department intantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		return dep;
+	}
+
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller sel = new Seller();
+		sel.setId(rs.getInt("Id"));
+		sel.setName(rs.getString("Name"));
+		sel.setEmail(rs.getString("Email"));
+		sel.setBirthDate(rs.getDate("BirthDate"));
+		sel.setBaseSalary(rs.getDouble("BaseSalary"));
+		sel.setDepartment(dep);
+		return sel;
 	}
 
 }
