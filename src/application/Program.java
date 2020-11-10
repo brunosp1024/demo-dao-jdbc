@@ -16,8 +16,8 @@ public class Program {
 	public static void main(String[] args) throws ParseException {
 
 		Locale.setDefault(Locale.US);
-
 		SellerDao sellerDao = DaoFactory.createSellerDao();
+		
 		Seller sel = sellerDao.findById(3);
 		System.out.println(sel);
 
@@ -43,14 +43,18 @@ public class Program {
 		Seller seller = new Seller(null, "Goku", "goku@gmail.com", sdf.parse("13/04/1991"), 2500.0,
 				new Department(3, null));
 		sellerDao.insert(seller);
-		System.out.println("Inserted: new Id: " + seller.getId());*/
+		System.out.println("Inserted: new Id: " + seller.getId());
 
 		System.out.println("----------------------------------------------------------------------");
 
 		Seller sell = sellerDao.findById(1);
 		sell.setName("Maria bendita");
 		sellerDao.update(sell);
-		System.out.println("Update completed!");
+		System.out.println("Update completed!");*/
+		
+		System.out.println("----------------------------------------------------------------------");
+		
+		sellerDao.deleteById(11);
 
 	}
 
