@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import db.DB;
 import db.DbException;
@@ -48,16 +51,17 @@ public class SellerDaoJDBC implements SellerDao {
 					"SELECT seller.*,department.Name as DepName " 
 					+ "FROM seller INNER JOIN department "
 					+ "ON seller.DepartmentId = department.Id " 
-					+ "WHERE seller.Id = ?"
-			);
+					+ "WHERE seller.Id = ?");
+			
 			ps.setInt(1, id);
 			rs = ps.executeQuery();
+
 			if (rs.next()) { // Verifica se há algum resultado e retorna verdadeiro caso seja sim.
 				Department dep = intantiateDepartment(rs);
 				Seller sel = instantiateSeller(rs, dep);
 				return sel;
 			}
-
+			
 			return null;
 
 		} catch (SQLException e) {
@@ -91,6 +95,46 @@ public class SellerDaoJDBC implements SellerDao {
 		sel.setBaseSalary(rs.getDouble("BaseSalary"));
 		sel.setDepartment(dep);
 		return sel;
+	}
+
+	@Override
+	public List<Seller> findByDepartment(Department department) {
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName " 
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id " 
+					+ "WHERE DepartmentId = ? "
+					+ "ORDER BY Name ");
+			
+			ps.setInt(1, department.getId());
+			rs = ps.executeQuery();
+			Map<Integer, Department> map = new HashMap<>(); // Com o Map, o objeto Department não será instancido várias vezes.										// vezes, gerando repetições na memória;
+			List<Seller> list = new ArrayList<Seller>();
+			
+			while (rs.next()) { // Verifica se há algum resultado e retorna verdadeiro caso seja sim.
+
+				Department dep = map.get(rs.getInt("DepartmentId")); // Busca no Map se há algum Department com o Id informado.
+				if (dep == null) {
+					dep = intantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}
+
+				Seller sel = instantiateSeller(rs, dep);
+				list.add(sel);
+			}
+
+			return list;
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(ps);
+		}
 	}
 
 }
