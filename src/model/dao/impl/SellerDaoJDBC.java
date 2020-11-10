@@ -75,28 +75,42 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName  "
+					+ "FROM seller INNER JOIN department " 
+					+ "ON seller.DepartmentId = department.Id " 
+					+ "ORDER BY Name"); 
+			
+			rs = ps.executeQuery();
+			Map<Integer, Department> map = new HashMap<>(); // Com o Map, o objeto Department não será instancido várias vezes.										// vezes, gerando repetições na memória;
+			List<Seller> list = new ArrayList<Seller>();
+			
+			while (rs.next()) { // Verifica se há algum resultado e retorna verdadeiro caso seja sim.
 
-	private Department intantiateDepartment(ResultSet rs) throws SQLException {
-		Department dep = new Department();
-		dep.setId(rs.getInt("DepartmentId"));
-		dep.setName(rs.getString("DepName"));
-		return dep;
-	}
+				Department dep = map.get(rs.getInt("DepartmentId")); // Busca no Map se há algum Department com o Id informado.
+				if (dep == null) {
+					dep = intantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}
 
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-		Seller sel = new Seller();
-		sel.setId(rs.getInt("Id"));
-		sel.setName(rs.getString("Name"));
-		sel.setEmail(rs.getString("Email"));
-		sel.setBirthDate(rs.getDate("BirthDate"));
-		sel.setBaseSalary(rs.getDouble("BaseSalary"));
-		sel.setDepartment(dep);
-		return sel;
-	}
+				Seller sel = instantiateSeller(rs, dep);
+				list.add(sel);
+			}
 
+			return list;
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(ps);
+		}
+	}
+	
 	@Override
 	public List<Seller> findByDepartment(Department department) {
 		
@@ -135,6 +149,25 @@ public class SellerDaoJDBC implements SellerDao {
 			DB.closeResultSet(rs);
 			DB.closeStatement(ps);
 		}
+	}
+
+
+	private Department intantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		return dep;
+	}
+
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller sel = new Seller();
+		sel.setId(rs.getInt("Id"));
+		sel.setName(rs.getString("Name"));
+		sel.setEmail(rs.getString("Email"));
+		sel.setBirthDate(rs.getDate("BirthDate"));
+		sel.setBaseSalary(rs.getDouble("BaseSalary"));
+		sel.setDepartment(dep);
+		return sel;
 	}
 
 }
