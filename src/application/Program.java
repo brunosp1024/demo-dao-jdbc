@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import model.dao.DaoFactory;
+import model.dao.DepartmentDao;
 import model.dao.SellerDao;
 import model.dao.impl.SellerDaoJDBC;
 import model.entities.Department;
@@ -16,6 +17,27 @@ public class Program {
 	public static void main(String[] args) throws ParseException {
 
 		Locale.setDefault(Locale.US);
+		DepartmentDao depDao = DaoFactory.createDepartmentDao();
+		
+		List<Department> list = depDao.findAll();
+		for(Department obj : list) {
+			System.out.println(obj);
+		}
+		
+		/*
+		Department dep = depDao.findById(4);
+		System.out.println(dep);
+		
+		
+		Department dep = new Department(3, null);
+		dep.setName("Music");
+		depDao.update(dep);
+
+		Department dep = new Department(null, "Development");
+		depDao.insert(dep);
+		System.out.println("Inserted! Id: " + dep.getId());
+		System.out.println(dep);
+		
 		SellerDao sellerDao = DaoFactory.createSellerDao();
 		
 		Seller sel = sellerDao.findById(3);
@@ -38,7 +60,7 @@ public class Program {
 
 		System.out.println("----------------------------------------------------------------------");
 
-		/*SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 		Seller seller = new Seller(null, "Goku", "goku@gmail.com", sdf.parse("13/04/1991"), 2500.0,
 				new Department(3, null));
@@ -50,11 +72,12 @@ public class Program {
 		Seller sell = sellerDao.findById(1);
 		sell.setName("Maria bendita");
 		sellerDao.update(sell);
-		System.out.println("Update completed!");*/
+		System.out.println("Update completed!");
 		
 		System.out.println("----------------------------------------------------------------------");
 		
-		sellerDao.deleteById(11);
+		sellerDao.deleteById(11);*/
+
 
 	}
 
